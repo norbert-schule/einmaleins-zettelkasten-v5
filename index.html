@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Einmaleins">
+<title>Einmaleins-Zettelkasten</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f1e8;color:#24303a;font-family:system-ui,-apple-system,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:25px 18px 40px}h1{text-align:center;margin:0 0 8px;font-size:34px}
+.sub{text-align:center;color:#66717a;margin-bottom:22px}.panel,.game{background:white;border-radius:20px;padding:25px;box-shadow:0 8px 25px #00000012}
+.panel{max-width:720px;margin:auto}h2{text-align:center;margin-top:0}.names{display:grid;gap:10px;margin:18px 0}
+.name{padding:14px 18px;font-size:21px;text-align:left;border:1px solid #bcc4ca;border-radius:12px;background:#fafafa;cursor:pointer}
+.row{display:flex;gap:8px}.row input{flex:1}input,button{font:inherit;border:1px solid #bcc4ca;border-radius:10px;padding:10px 14px;background:#fff}
+button{cursor:pointer;font-weight:600}.primary{background:#24303a;color:white}.choice{margin:22px 0;padding:18px;border:1px solid #d1d6da;border-radius:14px;background:#fafafa}
+.choice h3{margin:0 0 12px;text-align:center}.checks{display:grid;grid-template-columns:repeat(5,1fr);gap:9px}
+.check{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 5px;background:white;border:1px solid #ccd2d6;border-radius:9px;cursor:pointer}
+.check input{width:19px;height:19px;padding:0}.hint{text-align:center;color:#66717a;font-size:14px;margin-top:10px}
+.top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.student{font-size:22px;font-weight:700}
+.task{text-align:center;font-size:64px;font-weight:700;margin:18px 0}.answer{text-align:center}#answer{width:180px;text-align:center;font-size:28px}
+.feedback{text-align:center;min-height:82px;margin-top:18px;font-size:21px;font-weight:600}.feedback small{display:block;font-weight:400;margin-top:7px;color:#66717a}
+.where{text-align:center;color:#66717a}.boxes{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-top:20px}
+.box{min-height:100px;border:2px solid #c7cdd1;border-radius:12px;padding:9px;text-align:center;background:#fafafa}.box strong{display:block}.count{font-size:27px;font-weight:700}
+.note{text-align:center;color:#66717a;font-size:14px;line-height:1.45;margin-top:18px}.hidden{display:none!important}
+.overlay{position:fixed;inset:0;background:#0008;display:flex;align-items:center;justify-content:center;padding:18px}
+.diploma{background:white;max-width:760px;width:100%;padding:42px 30px;text-align:center;border:8px double #24303a}.diploma h2{font-size:42px}.dname{font-size:36px;font-weight:800}.king{font-size:27px;margin:18px}.actions{display:flex;justify-content:center;gap:10px}
+@media print{body *{visibility:hidden!important}.overlay,.overlay *{visibility:visible!important}.overlay{position:static;background:white;padding:0}.diploma{max-width:none}.actions{display:none}}
+@media(max-width:700px){.boxes{grid-template-columns:repeat(3,1fr)}.checks{grid-template-columns:repeat(2,1fr)}.task{font-size:48px}.row{flex-direction:column}}
+</style></head>
+<body>
+<div class="wrap">
+<h1>🗂️ Einmaleins-Zettelkasten</h1>
+<div class="sub">Jede Aufgabe wandert Schritt für Schritt durch die Fächer.</div>
+
+<section id="start" class="panel">
+<h2>Wer übt heute?</h2><div id="names" class="names"></div>
+<div class="row"><input id="newName" maxlength="30" placeholder="Name des Kindes"><button id="add" class="primary">Name hinzufügen</button></div>
+<div class="choice"><h3>Welche Einmaleinsreihen möchtest du üben?</h3><div id="checks" class="checks"></div>
+<div class="hint">Du kannst eine oder mehrere Reihen ankreuzen.</div></div>
+</section>
+
+<section id="game" class="game hidden">
+<div class="top"><div id="student" class="student"></div><div><button id="back">← Anderes Kind / Reihen ändern</button> <button id="reset">Lernstand zurücksetzen</button></div></div>
+<div id="selectedInfo" class="hint"></div><div id="where" class="where"></div><div id="task" class="task"></div>
+<div class="answer"><input id="answer" type="number" inputmode="numeric"><button id="check" class="primary">Antwort prüfen</button></div>
+<div id="feedback" class="feedback"></div>
+<div class="boxes">
+<div class="box"><strong>Fach 1</strong><span id="c1" class="count">0</span></div>
+<div class="box"><strong>Fach 2</strong><span id="c2" class="count">0</span></div>
+<div class="box"><strong>Fach 3</strong><span id="c3" class="count">0</span></div>
+<div class="box"><strong>Fach 4</strong><span id="c4" class="count">0</span></div>
+<div class="box"><strong>Fach 5</strong><span id="c5" class="count">0</span></div>
+<div class="box"><strong>⭐ Fach 6</strong><span id="c6" class="count">0</span></div>
+</div>
+<div class="note">Fach 1 ist der Schwerpunkt. Aufgaben aus allen sechs Fächern werden regelmäßig eingestreut – auch aus Fach 6. Eine falsche Antwort setzt die Karte sofort in Fach 1 zurück.</div>
+</section></div>
+
+<div id="overlay" class="overlay hidden"><div class="diploma"><div style="font-size:48px">🏆</div><h2>Diplom</h2><div id="dname" class="dname"></div><div class="king">Du bist jetzt ein <strong>Einmaleinskönig!</strong> 👑</div><p>Du hast alle ausgewählten Einmaleinsreihen gelernt.</p><div class="actions"><button id="print" class="primary">🖨️ Diplom ausdrucken</button><button id="close">Weiter üben</button></div></div></div>
+
+<script>
+const KEY="einmaleinsZettelkastenV4";
+let data=JSON.parse(localStorage.getItem(KEY)||'{"students":{}}');
+let currentName="",card=null,busy=false;
+const $=id=>document.getElementById(id);
+
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function makeCards(rows){
+  let a=[];
+  // Deutsche Schreibweise der Reihen: 1 · Reihenzahl, 2 · Reihenzahl, ... 10 · Reihenzahl
+  rows.forEach(reihe=>{for(let zahl=1;zahl<=10;zahl++)a.push({a:zahl,b:reihe,box:1,streak:0})});
+  return a;
+}
+function getStudent(n){
+  if(!data.students[n])data.students[n]={rows:[1,2,3,4,5,6,7,8,9,10],cards:makeCards([1,2,3,4,5,6,7,8,9,10])};
+  return data.students[n];
+}
+function renderChecks(){
+  $("checks").innerHTML="";
+  for(let i=1;i<=10;i++){let l=document.createElement("label");l.className="check";l.innerHTML=`<input type="checkbox" value="${i}"> ${i}er-Reihe`;$("checks").appendChild(l)}
+}
+function setChecks(rows){document.querySelectorAll("#checks input").forEach(x=>x.checked=rows.includes(+x.value))}
+function selectedRows(){return [...document.querySelectorAll("#checks input:checked")].map(x=>+x.value)}
+function names(){
+  $("names").innerHTML="";let ks=Object.keys(data.students);
+  if(!ks.length){$("names").innerHTML='<div class="hint">Noch keine Namen eingetragen.</div>';return}
+  ks.forEach(n=>{let b=document.createElement("button");b.className="name";b.textContent="👤 "+n;b.onclick=()=>prepare(n);$("names").appendChild(b)})
+}
+function prepare(n){currentName=n;setChecks(getStudent(n).rows||[1,2,3,4,5,6,7,8,9,10]);$("newName").value="";$("add").textContent="Auswahl übernehmen"}
+function start(){
+  let rows=selectedRows();
+  if(!currentName){let n=$("newName").value.trim();if(!n)return;currentName=n;if(!data.students[n])data.students[n]={rows:[],cards:[]}}
+  if(!rows.length){alert("Bitte mindestens eine Einmaleinsreihe auswählen.");return}
+  let s=getStudent(currentName),old=s.cards||[],map=new Map(old.map(c=>[c.a+"·"+c.b,c]));
+  rows.forEach(reihe=>{for(let zahl=1;zahl<=10;zahl++){let k=zahl+"·"+reihe;if(!map.has(k))map.set(k,{a:zahl,b:reihe,box:1,streak:0})}});
+  s.cards=[...map.values()];s.rows=rows;save();
+  $("student").textContent="👤 "+currentName;$("selectedInfo").textContent="Geübt werden: "+rows.map(x=>x+". Reihe").join(", ");
+  $("start").classList.add("hidden");$("game").classList.remove("hidden");$("add").textContent="Name hinzufügen";update();pick()
+}
+function pick(){
+  if(busy||!currentName)return;let s=getStudent(currentName),rows=s.rows||[],cs=s.cards.filter(c=>rows.includes(c.b)),weights={1:65,2:15,3:9,4:6,5:4,6:1},pool=[];
+  cs.forEach(c=>{for(let i=0;i<weights[c.box];i++)pool.push(c)});
+  card=pool[Math.floor(Math.random()*pool.length)];
+  $("task").textContent=card.a+" · "+card.b+" = ?";$("where").textContent="Diese Karte liegt im Fach "+card.box+".";$("answer").value="";$("feedback").innerHTML="";$("answer").focus()
+}
+function update(){let s=getStudent(currentName),rows=s.rows||[],cs=s.cards.filter(c=>rows.includes(c.b));for(let i=1;i<=6;i++)$("c"+i).textContent=cs.filter(c=>c.box===i).length}
+function all6(){let s=getStudent(currentName),rows=s.rows||[],cs=s.cards.filter(c=>rows.includes(c.b));return cs.length>0&&cs.every(c=>c.box===6)}
+function check(){
+  if(busy||!card||$("answer").value.trim()==="")return;busy=true;let correct=card.a*card.b,ok=+$("answer").value===correct;
+  if(ok){card.streak++;if(card.box>=5||card.streak>=5){card.box=6;card.streak=5;$("feedback").innerHTML=`🎉 Richtig!<small>${card.a} · ${card.b} = ${correct}<br>Die Karte wandert ins ⭐ Fach 6.</small>`}
+  else{card.box++;$("feedback").innerHTML=`🎉 Richtig!<small>${card.a} · ${card.b} = ${correct}<br>Die Karte wandert ins Fach ${card.box}.</small>`}}
+  else{card.box=1;card.streak=0;$("feedback").innerHTML=`😊 Die richtige Lösung ist:<br><strong>${card.a} · ${card.b} = ${correct}</strong><small>Die Karte kommt zurück in Fach 1.</small>`}
+  save();update();setTimeout(()=>{busy=false;if(all6()){$("dname").textContent=currentName;$("overlay").classList.remove("hidden")}pick()},2200)
+}
+$("add").onclick=()=>{let n=$("newName").value.trim();if(!currentName&&n)currentName=n;if(currentName)start()};
+$("newName").onkeydown=e=>{if(e.key==="Enter")$("add").click()};$("check").onclick=check;$("answer").onkeydown=e=>{if(e.key==="Enter")check()};
+$("back").onclick=()=>{$("game").classList.add("hidden");$("start").classList.remove("hidden");setChecks(getStudent(currentName).rows||[]);$("add").textContent="Auswahl übernehmen"};
+$("reset").onclick=()=>{if(confirm("Den Lernstand von "+currentName+" wirklich zurücksetzen?")){let s=getStudent(currentName);s.cards=makeCards(s.rows);save();update();pick()}};
+$("print").onclick=()=>window.print();$("close").onclick=()=>$("overlay").classList.add("hidden");
+renderChecks();names();
+</script></body></html>
